@@ -1,4 +1,4 @@
-The repository is for the simulation code of the manuscript: How environment and genetic architecture of unreduced gametes shape the establishment of autopolyploids, by Cheng et al. (2024). The manuscript is available on Biorxiv (to be added when available).
+The repository is for the simulation code of the manuscript: How environment and genetic architecture of unreduced gametes shape the establishment of autopolyploids, by Cheng et al. (2024). The manuscript is available on Biorxiv (https://www.biorxiv.org/content/10.1101/2024.09.13.612821v1).
 
 It contains the annotated Rcode to perform or replicate the simulations.
 
