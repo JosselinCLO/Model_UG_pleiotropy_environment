@@ -5,21 +5,22 @@
 
 ### Functions to perform the simulations:
 
-
-# A function to introduce mutations within newly formed gametes for the quantitative trait
+# A function to introduce mutations within newly formed gametes for the different traits (fitness, UGs male and female)
 
 Mutation<-function(haplotype, U, Locus_trait,Locus_UG, var.add.eff)
 {
   
-  Nb_mut_trait<-rpois(1,U) ## The number of mutations to be done for trait
+  Nb_mut_trait<-rpois(1,U) ## The number of mutations to be done for trait related to fitness
   Nb_mut_UG_F<-rpois(1,U) ## The number of mutations to be done for UG female
   Nb_mut_UG_M<-rpois(1,U) ## The number of mutations to be done for UG male
   
   ## The positions of the mutations on the haploid genome
+
+  # You sample the positions of the mutations for each trait randomly with the sample function
   
   position_mut<-c(sample(1:Locus_trait, Nb_mut_trait, replace = F), sample((Locus_trait+1):(Locus_trait+Locus_UG), Nb_mut_UG_F, replace = F),sample((Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG), Nb_mut_UG_M, replace = F)) 
   
-  # Make the mutations
+  # Make the mutations if the sum of all possible mutations (on the three traits) is different from zero
   
   if((Nb_mut_trait+Nb_mut_UG_F+Nb_mut_UG_M) != 0){
     
@@ -28,7 +29,8 @@ Mutation<-function(haplotype, U, Locus_trait,Locus_UG, var.add.eff)
     for(i in 1:length(position_mut)){
       
       haplotype[position_mut[i]]= as.numeric(haplotype[position_mut[i]]) + rnorm(n = 1, mean = 0, sd = var.add.eff^0.5)
-      
+      # You modified the allelic value by adding a number sampled in a normal distribution of mean zero and a variance var.add.eff
+        
     }
     
   }
@@ -45,12 +47,14 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
   
   vector_proba_sampling = fitness
   
-  # The probabilities of producing UG for female and male functions
+  # The probabilities of producing UG for female and male functions are calculated thanks to the function "proba_unreduced_gametes_XXX"
+  # XXX being male or female
   
   vector_proba_unred_gam_female = proba_unreduced_gametes_female(Locus_trait,Locus_UG,Npop,Diploid_ind, Tetraploid_ind)
   vector_proba_unred_gam_male = proba_unreduced_gametes_male(Locus_trait,Locus_UG,Npop,Diploid_ind, Tetraploid_ind, pleiotropy, pleio_type)
   
-  # During the adaptation process (step == 2), environment can influence UG production
+  # During the adaptation process (step == 2), environment can influence UG production such that you add the value "effect_env_UG"
+  # to the above-mentioned probability
   
   if(step == 2){
     
@@ -62,15 +66,19 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
   }
   
   ## Reproduction
+
+  # Nb_offsrpings will allow us to count the number of offspring and to stop the production once nb_offsprings = Npop
   
   Nb_offsprings = 0
+
+  # Vectors to store the generated diploid and tetraploid offspring 
   
   diplo_ind_temp = c(NULL)
   tetra_ind_temp = c(NULL)
   
   repeat{
     
-    # Select the first parent (female by default)
+    # Select the first parent based on fitness "vector_proba_sampling" (female by default), and store the ploidy
     
     Parent_1 = sample(1:Npop, 1, replace = F, prob = vector_proba_sampling)
     if(Parent_1 <= (nrow(Diploid_ind)/2)){Ploidy_parent1 = "diploid"}
@@ -83,38 +91,46 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
     else if(Ploidy_parent1 == "tetraploid" && vector_proba_unred_gam_female[Parent_1] <= runif(1, 0, 1)){Gamete_parent1 = "diplo"}
     else{Gamete_parent1 = "tetra"}
     
-    # We assume fully outcrossing populations
+    # We assume fully outcrossing populations so we sample a second different parent
     
     repeat{Parent_2 = sample(1:Npop, 1, replace = F, prob = vector_proba_sampling)
       if(Parent_2 != Parent_1){break}
     }
-      
+
+    # We store the ploidy
+    
     if(Parent_2 <= (nrow(Diploid_ind)/2)){Ploidy_parent2 = "diploid"}
     else{Ploidy_parent2 = "tetraploid"}
+
+    # We sample the kind of gamete the parent produces (reduced or unreduced)
       
     if(Ploidy_parent2 == "diploid" && vector_proba_unred_gam_male[Parent_2] <= runif(1, 0, 1)){Gamete_parent2 = "haplo"}
     else if(Ploidy_parent2 == "diploid" && vector_proba_unred_gam_male[Parent_2] >= runif(1, 0, 1)){Gamete_parent2 = "diplo"}
     else if(Ploidy_parent2 == "tetraploid" && vector_proba_unred_gam_male[Parent_2] <= runif(1, 0, 1)){Gamete_parent2 = "diplo"}
     else{Gamete_parent2 = "tetra"}
     
-    # We assume no triploids 
-    
+    # We assume no triploid, so we check every "fit" possibility
+
+    # Case 1, two diploid parents producing reduced gametes and a diploid offspring
+      
     if(Ploidy_parent1 == "diploid" && Ploidy_parent2 == "diploid" && Gamete_parent1 == "haplo" && Gamete_parent2 == "haplo"){
       
       # First case, two diploids parents producing reduced gametes (diploid offsprings)
       
       Nb_offsprings = Nb_offsprings + 1
       
-      # Gametes 1 & 2
+      # Vectors to store the two Gametes 1 & 2
       
       Gamete_1_temp = c(NULL)
       Gamete_2_temp = c(NULL)
       
       for(l in 1:(Locus_trait+Locus_UG+Locus_UG)){
-        
+
+        # Store the allelic values of the parents at the lth loci
         temp_ind_1 = c(Diploid_ind[2*Parent_1,l],Diploid_ind[(2*Parent_1)-1,l])
         temp_ind_2 = c(Diploid_ind[2*Parent_2,l],Diploid_ind[(2*Parent_2)-1,l])
-        
+
+        # Sample one value over the two parental ones
         Gamete_1_temp[l] = sample(temp_ind_1, 1, replace = F)
         Gamete_2_temp[l] = sample(temp_ind_2, 1, replace = F)
         
@@ -274,9 +290,11 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
   
 }
 
+# A function to compute the probability of producing UG for the female function
+      
 proba_unreduced_gametes_female <-function( Locus_trait,Locus_UG, Npop, Diploid_ind, Tetraploid_ind){
   
-  # Prepare the production of UG for female function, for diploids and tetraploids individuals
+  # Prepare the production of UG for female function, for diploid and tetraploid individuals
   
   list_proba_unreduced = c(NULL)
   
@@ -316,6 +334,8 @@ proba_unreduced_gametes_female <-function( Locus_trait,Locus_UG, Npop, Diploid_i
   
 }
 
+# A function to compute the probability of producing UG for the male function
+    
 proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind, Tetraploid_ind, pleiotropy, pleio_type){
   
   # Prepare the production of UG for male function, for diploids and tetraploids individuals
