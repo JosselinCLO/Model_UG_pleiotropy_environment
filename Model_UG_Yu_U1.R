@@ -53,7 +53,7 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
   vector_proba_unred_gam_female = proba_unreduced_gametes_female(Locus_trait,Locus_UG,Npop,Diploid_ind, Tetraploid_ind)
   vector_proba_unred_gam_male = proba_unreduced_gametes_male(Locus_trait,Locus_UG,Npop,Diploid_ind, Tetraploid_ind, pleiotropy, pleio_type)
   
-  # During the adaptation process (step == 2), environment can influence UG production such that you add the value "effect_env_UG"
+  # During the adaptation process (step == 2), the environment can influence UG production such that you add the value "effect_env_UG"
   # to the above-mentioned probability
   
   if(step == 2){
@@ -135,12 +135,17 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
         Gamete_2_temp[l] = sample(temp_ind_2, 1, replace = F)
         
       }
+
+      # Introduction of possible mutations on the newly formed gametes
       
       Gamete_1_mut = Mutation(Gamete_1_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_2_mut = Mutation(Gamete_2_temp, U, Locus_trait,Locus_UG, var.add.eff)
+
+      # Store the ploidy of the individual
       
       ploidy = c(rep("Diploid", times = 2))
-      
+
+      # We merge the two information (two haploid genomes plus ploidy level of the offspring)
       Offspirng_temp_fin = rbind(Gamete_1_mut,Gamete_2_mut)
       Offspirng_fin = cbind(Offspirng_temp_fin, ploidy)
       
@@ -149,24 +154,28 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
     }
     else if(Ploidy_parent1 == "diploid" && Ploidy_parent2 == "diploid" && Gamete_parent1 == "diplo" && Gamete_parent2 == "diplo"){
       
-      # Second case, two diploids parents making unreduced gametes (tetraploid offsprings)
+      # Second case, two diploid parents making unreduced gametes (tetraploid offsprings)
       
       Nb_offsprings = Nb_offsprings + 1
       
       # Gametes 1 & 2
-      
+
+      # Sample the two diploid unreduced gametes from diploid individuals
       Gamete_1.1_temp = Diploid_ind[((2*Parent_1)-1),1:(Locus_trait+Locus_UG+Locus_UG)]
       Gamete_1.2_temp = Diploid_ind[(2*Parent_1),1:(Locus_trait+Locus_UG+Locus_UG)]
       Gamete_2.1_temp = Diploid_ind[((2*Parent_2)-1),1:(Locus_trait+Locus_UG+Locus_UG)]
       Gamete_2.2_temp = Diploid_ind[(2*Parent_2),1:(Locus_trait+Locus_UG+Locus_UG)]
       
+      # Introduction of mutations in the generated gametes
       Gamete_1.1_mut = Mutation(Gamete_1.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_1.2_mut = Mutation(Gamete_1.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_2.1_mut = Mutation(Gamete_2.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_2.2_mut = Mutation(Gamete_2.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
-      
+
+      # Store the ploidy
       ploidy = c(rep("Tetraploid", times = 4))
       
+      # Merge the information about the genome and ploidy of the offspring
       Offspirng_temp_fin = rbind(Gamete_1.1_mut,Gamete_1.2_mut,Gamete_2.1_mut,Gamete_2.2_mut)
       Offspirng_fin = cbind(Offspirng_temp_fin, ploidy)
       
@@ -178,15 +187,18 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
       # Third case, one diploid parent making unreduced gametes and one tetraploid parent making reduced gametes (tetraploid offsprings)
       
       Nb_offsprings = Nb_offsprings + 1
-      
+
+      # If the first selected parent is diploid:
       if(Ploidy_parent1 == "diploid"){
-        
+
+        # Sample the genome of the diploid parent
         Gamete_1.1_temp = Diploid_ind[((2*Parent_1)-1),1:(Locus_trait+Locus_UG+Locus_UG)]
         Gamete_1.2_temp = Diploid_ind[(2*Parent_1),1:(Locus_trait+Locus_UG+Locus_UG)]
         
         Gamete_2.1_temp = c(NULL)
         Gamete_2.2_temp = c(NULL)
-        
+
+        # Do the same for the tetraploid parent
         for(l in 1:(Locus_trait+Locus_UG+Locus_UG)){
           
           temp_ind_2 = c(Tetraploid_ind[4*(Parent_2-(nrow(Diploid_ind)/2)),l],Tetraploid_ind[(4*(Parent_2-(nrow(Diploid_ind)/2)))-3,l],Tetraploid_ind[(4*(Parent_2-(nrow(Diploid_ind)/2)))-2,l],Tetraploid_ind[(4*(Parent_2-(nrow(Diploid_ind)/2)))-1,l])
@@ -196,14 +208,18 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
           Gamete_2.1_temp[l] = Gamete_2_temp[1]
           Gamete_2.2_temp[l] = Gamete_2_temp[2]
         }
-        
+
+
+        # Introduction of mutations
         Gamete_1.1_mut = Mutation(Gamete_1.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_1.2_mut = Mutation(Gamete_1.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_2.1_mut = Mutation(Gamete_2.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_2.2_mut = Mutation(Gamete_2.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
         
+        # Ploidy of the offspring
         ploidy = c(rep("Tetraploid", times = 4))
         
+        # Merge the information about the genome and ploidy of the offspring
         Offspirng_temp_fin = rbind(Gamete_1.1_mut,Gamete_1.2_mut,Gamete_2.1_mut,Gamete_2.2_mut)
         Offspirng_fin = cbind(Offspirng_temp_fin, ploidy)
         
@@ -211,12 +227,15 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
         else{tetra_ind_temp = rbind(tetra_ind_temp,Offspirng_fin)}
       }
       else{
+        
+        # Do the same as previous but the second parent is the diploid one
         Gamete_2.1_temp = Diploid_ind[((2*Parent_2)-1),1:(Locus_trait+Locus_UG+Locus_UG)]
         Gamete_2.2_temp = Diploid_ind[(2*Parent_2),1:(Locus_trait+Locus_UG+Locus_UG)]
         
         Gamete_1.1_temp = c(NULL)
         Gamete_1.2_temp = c(NULL)
         
+        # Sample tetraploid gamete
         for(l in 1:(Locus_trait+Locus_UG+Locus_UG)){
           
           temp_ind_1 = c(Tetraploid_ind[4*(Parent_1-(nrow(Diploid_ind)/2)),l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-3,l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-2,l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-1,l])
@@ -226,14 +245,17 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
           Gamete_1.1_temp[l] = Gamete_1_temp[1]
           Gamete_1.2_temp[l] = Gamete_1_temp[2]
         }
-        
+
+        # Introdudce mutations
         Gamete_1.1_mut = Mutation(Gamete_1.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_1.2_mut = Mutation(Gamete_1.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_2.1_mut = Mutation(Gamete_2.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
         Gamete_2.2_mut = Mutation(Gamete_2.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
-        
+
+        # Save the ploidy of the offspring
         ploidy = c(rep("Tetraploid", times = 4))
-        
+
+        # Merge the information about the genome and ploidy of the offspring
         Offspirng_temp_fin = rbind(Gamete_1.1_mut,Gamete_1.2_mut,Gamete_2.1_mut,Gamete_2.2_mut)
         Offspirng_fin = cbind(Offspirng_temp_fin, ploidy)
         
@@ -251,7 +273,8 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
       
       Gamete_2.1_temp = c(NULL)
       Gamete_2.2_temp = c(NULL)
-      
+
+      # Store the two reduced diploid gametes of the tetraploid parents
       for(l in 1:(Locus_trait+Locus_UG+Locus_UG)){
         
         temp_ind_1 = c(Tetraploid_ind[4*(Parent_1-(nrow(Diploid_ind)/2)),l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-3,l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-2,l],Tetraploid_ind[(4*(Parent_1-(nrow(Diploid_ind)/2)))-1,l])
@@ -266,14 +289,17 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
         Gamete_2.1_temp[l] = Gamete_2_temp[1]
         Gamete_2.2_temp[l] = Gamete_2_temp[2]
       }
-      
+
+      # Introduce mutations
       Gamete_1.1_mut = Mutation(Gamete_1.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_1.2_mut = Mutation(Gamete_1.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_2.1_mut = Mutation(Gamete_2.1_temp, U, Locus_trait,Locus_UG, var.add.eff)
       Gamete_2.2_mut = Mutation(Gamete_2.2_temp, U, Locus_trait,Locus_UG, var.add.eff)
       
+      # Save the ploidy level of the offspring
       ploidy = c(rep("Tetraploid", times = 4))
-      
+
+      # Merge the information about the genome of the offspring and its ploidy level
       Offspirng_temp_fin = rbind(Gamete_1.1_mut,Gamete_1.2_mut,Gamete_2.1_mut,Gamete_2.2_mut)
       Offspirng_fin = cbind(Offspirng_temp_fin, ploidy)
       
@@ -283,7 +309,8 @@ reproduction <- function(Diploid_ind, Tetraploid_ind, Locus_trait,Locus_UG, U, N
     
     if(Nb_offsprings == Npop){break}   
   }
-  
+
+  # Merge the two subtables containing diploid and tetraploid offsprings
   All_ind_temp = rbind(diplo_ind_temp, tetra_ind_temp)  
   
   return(All_ind_temp)
@@ -299,15 +326,18 @@ proba_unreduced_gametes_female <-function( Locus_trait,Locus_UG, Npop, Diploid_i
   list_proba_unreduced = c(NULL)
   
   k = 0
-  
+
+  # Check if there are diploids and tetraploids individuals in the population
   if(nrow(Diploid_ind) !=0){
     
     for(i in 1:(nrow(Diploid_ind)/2)){
       
       k = k + 1
-      
+
+      # Sum the allelic values for loci coding for UG production in females
       val_temp = sum(abs(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+1):(Locus_trait+Locus_UG)]))) + sum(abs(as.numeric(Diploid_ind[(2*i), (Locus_trait+1):(Locus_trait+Locus_UG)])))
 
+      # If the value is not realistic (i.e. negative or higher than 1), just assign the associated extreme value (0 or 1)
       if(val_temp < 0){val_temp = 0}
       else if(val_temp > 1){val_temp = 1}
       else{val_temp = val_temp}
@@ -315,7 +345,8 @@ proba_unreduced_gametes_female <-function( Locus_trait,Locus_UG, Npop, Diploid_i
       list_proba_unreduced[k] = val_temp
     }
   }
-  
+
+  # If there are some tetraploids
   if(k < Npop && is.null(nrow(Tetraploid_ind)) == F){
     for(i in 1:(nrow(Tetraploid_ind)/4)){
       k = k + 1
@@ -338,12 +369,15 @@ proba_unreduced_gametes_female <-function( Locus_trait,Locus_UG, Npop, Diploid_i
     
 proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind, Tetraploid_ind, pleiotropy, pleio_type){
   
-  # Prepare the production of UG for male function, for diploids and tetraploids individuals
+  # Prepare the production of UG for male function, for diploid and tetraploid individuals
   
   list_proba_unreduced = c(NULL)
   
   k = 0
-  
+
+  # The same is true for males
+
+  # Check if there are diploids and tetraploids, and check the pleiotropy scenario
   if(pleio_type != 0){
     if(nrow(Diploid_ind) !=0){
       
@@ -351,9 +385,9 @@ proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind,
         
         k = k + 1
         
-        #val_temp = sum(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+1):(Locus_trait+pleiotropy)]))+ sum(as.numeric(Diploid_ind[(2*i), (Locus_trait+1):(Locus_trait+pleiotropy)]))+sum(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Diploid_ind[(2*i), (Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))
         val_temp = sum(abs(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+1):(Locus_trait+pleiotropy)])))+ sum(abs(as.numeric(Diploid_ind[(2*i), (Locus_trait+1):(Locus_trait+pleiotropy)])))+sum(abs(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Diploid_ind[(2*i), (Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)])))
 
+        # As before, if the probability is smaller than 0 or higher than 1, assign the associated extreme value (0 or 1)
         if(val_temp < 0){val_temp = 0}
         else if(val_temp > 1){val_temp = 1}
         else{val_temp = val_temp}
@@ -361,13 +395,12 @@ proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind,
         list_proba_unreduced[k] = val_temp
       }
     }
-    
+    #Check if there are tetraploids
     if(k < Npop && is.null(nrow(Tetraploid_ind)) == F){
       for(i in 1:(nrow(Tetraploid_ind)/4)){
         k = k + 1
         
-        #val_temp = sum(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+pleiotropy+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))
-         val_temp = sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+pleiotropy+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
+        val_temp = sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+1):(Locus_trait+pleiotropy)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+pleiotropy+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+pleiotropy+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
 
         if(val_temp < 0){val_temp = 0}
         else if(val_temp > 1){val_temp = 1}
@@ -384,8 +417,7 @@ proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind,
       
       k = k + 1
       
-      #val_temp = sum(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Diploid_ind[(2*i), (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))
-       val_temp = sum(abs(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Diploid_ind[(2*i), (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
+      val_temp = sum(abs(as.numeric(Diploid_ind[(2*i)-1, (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Diploid_ind[(2*i), (Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
 
       if(val_temp < 0){val_temp = 0}
       else if(val_temp > 1){val_temp = 1}
@@ -399,8 +431,7 @@ proba_unreduced_gametes_male <-function( Locus_trait,Locus_UG, Npop,Diploid_ind,
     for(i in 1:(nrow(Tetraploid_ind)/4)){
       k = k + 1
       
-      #val_temp = sum(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])) + sum(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))
-       val_temp = sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
+      val_temp = sum(abs(as.numeric(Tetraploid_ind[(4*i)-3,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-2,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i)-1,(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)]))) + sum(abs(as.numeric(Tetraploid_ind[(4*i),(Locus_trait+Locus_UG+1):(Locus_trait+Locus_UG+Locus_UG)])))
 
       if(val_temp < 0){val_temp = 0}
       else if(val_temp > 1){val_temp = 1}
@@ -446,23 +477,28 @@ genotype.offspring <-function(Diploid_ind, Tetraploid_ind, dosage, Npop, Locus_t
     ## An empty vector of genotypic values
     
     k = 0
-    
+
+    # Control for the pleiotropy scenario
     if(pleio_type == 2){
       if(nrow(Diploid_ind) !=0){
         for(i in 1:(nrow(Diploid_ind)/2)){
           
-          ## With additivity, genotype is just the sum of all values stored in the genome file
+          ## With additivity, the genotype is just the sum of all values stored in the genome file
           
           k = k + 1
           geno.off[k] = sum(as.numeric(Diploid_ind[2*i,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Diploid_ind[(2*i) - 1,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Diploid_ind[2*i,(pleiotropy+1):Locus_trait])) + sum(as.numeric(Diploid_ind[(2*i) - 1,(pleiotropy+1):Locus_trait]))
           
         }
       }
-      
+      #Check if there are tetraploids
       if(k < Npop && is.null(nrow(Tetraploid_ind)) == F){
         for(i in 1:(nrow(Tetraploid_ind)/4)){
           
           k = k + 1
+          ## With additivity, the genotype is just the sum of all values stored in the genome file
+          ## but we also consider that in nature tetraploids are not two times bigger than diploids
+          ## such that the "dosage" parameter rescales the genotypic value accordingly (see M&M for details)
+
           geno.off[k] = (1+dosage)*(sum(as.numeric(Tetraploid_ind[4*i,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i) - 1,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i) - 2,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[(4*i) - 3,(Locus_trait+1):(Locus_trait+pleiotropy)])) + sum(as.numeric(Tetraploid_ind[4*i,(pleiotropy+1):Locus_trait])) + sum(as.numeric(Tetraploid_ind[(4*i) - 1,(pleiotropy+1):Locus_trait])) + sum(as.numeric(Tetraploid_ind[(4*i) - 2,(pleiotropy+1):Locus_trait]))+ sum(as.numeric(Tetraploid_ind[(4*i) - 3,(pleiotropy+1):Locus_trait])))
           
         }
@@ -484,6 +520,11 @@ genotype.offspring <-function(Diploid_ind, Tetraploid_ind, dosage, Npop, Locus_t
     for(i in 1:(nrow(Tetraploid_ind)/4)){
       
       k = k + 1
+
+      ## With additivity, the genotype is just the sum of all values stored in the genome file
+      ## but we also consider that in nature tetraploids are not two times bigger than diploids
+      ## such that the "dosage" parameter rescales the genotypic value accordingly (see M&M for details)
+      
       geno.off[k] = (1+dosage)*(sum(as.numeric(Tetraploid_ind[4*i,1:Locus_trait])) + sum(as.numeric(Tetraploid_ind[(4*i) - 1,1:Locus_trait]))+ sum(as.numeric(Tetraploid_ind[(4*i) - 2,1:Locus_trait])) + sum(as.numeric(Tetraploid_ind[(4*i) - 3,1:Locus_trait])))
       
       }
@@ -493,7 +534,7 @@ genotype.offspring <-function(Diploid_ind, Tetraploid_ind, dosage, Npop, Locus_t
   return(geno.off)
 }
 
-# A function to check if population is at equilibrium
+# A function to check if it is time to check if the population is at equilibrium
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
 
