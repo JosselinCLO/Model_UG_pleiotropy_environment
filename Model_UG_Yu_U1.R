@@ -1,7 +1,20 @@
 ## This code has been used to generate the results of the manuscript
-## Title : How environment and genetic architecture of unreduced gametes shape the establishment of autopolyploids
+## Title: How environment and genetic architecture of unreduced gametes shape the establishment of autopolyploids
 ## Authors : Chen, Yu; Schmickl, Roswitha; Kolar, Filip; and Clo, Josselin.
 ## Contacts : josselin.clo@gmail.com; chengyu@natur.cuni.cz
+
+## It is possible to match table 1 abbreviation with the parameters of this Rcode:
+
+# Population size N = Npop here
+# Number of loci quantitative trait L = Locus_trait here
+# Number of loci UG production L_G = Locus_UG here
+# Number of pleiotropic loci = pleiotropy here
+# Number of replicates = Nb_rep here
+# Pleiotropy scenario = pleio_type here
+# Haploid genomic mutation rate U = U here
+# Variance of mutational effects a² = var.add.eff here
+# Variance of environmental effects VE = 1 here (can be modified line 473 of the code)
+# Strength of stabilizing selection w² = om_2 here
 
 ### Functions to perform the simulations:
 
